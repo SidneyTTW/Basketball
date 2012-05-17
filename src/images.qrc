@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/basketball.png</file>
+        <file>images/lakers.png</file>
+    </qresource>
+</RCC>
