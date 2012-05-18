@@ -16,7 +16,9 @@ public:
   /**
    * Constructor.
    */
-  PlayerCamera(Point3D playerPos, double initT, double initF);
+  PlayerCamera(Point3D playerPos, double initT, double initF,
+               double xFrom, double xTo, double yFrom,
+               double yTo, double zFrom, double zTo);
 
   /**
    * Look up.
@@ -87,7 +89,7 @@ public:
    */
   inline void moveUp(int speed)
   {
-    pos._z += 0.002 * speed;
+    pos._z = qBound(_zFrom, pos._z + 0.002 * speed, _zTo);
   }
 
   /**
@@ -95,7 +97,7 @@ public:
    */
   inline void moveDown(int speed)
   {
-    pos._z -= 0.002 * speed;
+    pos._z = qBound(_zFrom, pos._z - 0.002 * speed, _zTo);
   }
 
   /**
@@ -105,6 +107,8 @@ public:
   {
     Point3D forward = Point3D(qCos(f), qSin(f), 0).normalize();
     pos += forward * 0.005 * speed;
+    pos._x = qBound(_xFrom, pos._x, _xTo);
+    pos._y = qBound(_yFrom, pos._y, _yTo);
   }
 
   /**
@@ -114,6 +118,8 @@ public:
   {
     Point3D forward = Point3D(qCos(f), qSin(f), 0).normalize();
     pos -= forward * 0.005 * speed;
+    pos._x = qBound(_xFrom, pos._x, _xTo);
+    pos._y = qBound(_yFrom, pos._y, _yTo);
   }
 
   /**
@@ -123,6 +129,8 @@ public:
   {
     Point3D left = cross(Point3D(0, 0, 1), Point3D(qCos(f), qSin(f), 0)).normalize();
     pos += left * 0.005 * speed;
+    pos._x = qBound(_xFrom, pos._x, _xTo);
+    pos._y = qBound(_yFrom, pos._y, _yTo);
   }
 
   /**
@@ -132,6 +140,8 @@ public:
   {
     Point3D left = cross(Point3D(0, 0, -1), Point3D(qCos(f), qSin(f), 0)).normalize();
     pos += left * 0.005 * speed;
+    pos._x = qBound(_xFrom, pos._x, _xTo);
+    pos._y = qBound(_yFrom, pos._y, _yTo);
   }
 
   /**
@@ -177,6 +187,36 @@ private:
    * The f.
    */
   double f;
+
+  /**
+   * The bound.
+   */
+  double _xFrom;
+
+  /**
+   * The bound.
+   */
+  double _xTo;
+
+  /**
+   * The bound.
+   */
+  double _yFrom;
+
+  /**
+   * The bound.
+   */
+  double _yTo;
+
+  /**
+   * The bound.
+   */
+  double _zFrom;
+
+  /**
+   * The bound.
+   */
+  double _zTo;
 };
 
 #endif // PLAYERCAMERA_H

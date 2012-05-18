@@ -138,9 +138,14 @@ private:
   static Point3D builtInSpeeds[15];
 
   /**
-   * Whether to draw the mirror part.
+   * Whether to draw the mirror part of rebound 0.
    */
-  bool mirror;
+  bool mirror0;
+
+  /**
+   * Whether to draw the mirror part of rebound 1.
+   */
+  bool mirror1;
 
   /**
    * @return The speed of the ball if user throws it with current power.

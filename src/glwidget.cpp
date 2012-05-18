@@ -59,7 +59,8 @@ GLWidget::GLWidget() :
     forceAngle(0),
     mousePressed(false),
     mayBeOpenShot(true),
-    mirror(true)
+    mirror0(true),
+    mirror1(false)
 {
   timer = new QTimer();
   timer->setInterval(25);
@@ -113,7 +114,13 @@ void GLWidget::initializeGL()
                                           MyGlobal::BASKET_HEIGHT),
                                   1.5);
 
-  cameras[1] = new PlayerCamera(Point3D(3.5, 10.5, 1.7), PI * 2 / 5, PI / 2 + PI / 3);
+  cameras[1] = new PlayerCamera(Point3D(3.5, 10.5, 1.7), PI * 2 / 5, PI / 2 + PI / 3,
+                                -MyGlobal::BASKETBALL_COURT_WIDTH / 2,
+                                MyGlobal::BASKETBALL_COURT_WIDTH / 2,
+                                -MyGlobal::BASKETBALL_COURT_LENGTH / 2 + 2.5,
+                                MyGlobal::BASKETBALL_COURT_LENGTH / 2 - 2.5,
+                                0.5,
+                                5);
   cameras[2] = new ZCamera(basketBall, PI, 10);
 
   connect(world,
@@ -144,7 +151,6 @@ void GLWidget::initializeGL()
 void GLWidget::paintGL()
 {
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-  double eqr[] = {0.0, 0.0, -1.0, 0.0}; // 设置剪切平面
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -153,25 +159,30 @@ void GLWidget::paintGL()
 
   cameras[(int) cameraType]->look();
 
-  if (mirror)
+  if (mirror0)
   {
+    double eqr[] = {0.0, 1.0, 0.0, 0.0};
     glColorMask(0, 0, 0, 0);
-    glEnable(GL_STENCIL_TEST); // 启用蒙板缓存
-    glStencilFunc(GL_ALWAYS, 1, 1); // 设置蒙板测试总是通过，参考值、掩码值都设为1
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); // 设置当深度测试不通过时，保留蒙板中的值不变，如果通过则使用参考值替换蒙板值
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_ALWAYS, 1, 1);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
     glDisable(GL_DEPTH_TEST);
-    floor->render();
+    basket[0]->renderRebound();
     glEnable(GL_DEPTH_TEST);
-    glColorMask(1, 1, 1, 1); // 可以绘制颜色
-    glStencilFunc(GL_EQUAL, 1, 1); // 下面的设置指定当我们绘制时，不改变蒙板缓存区的值
+    glColorMask(1, 1, 1, 1);
+    glStencilFunc(GL_EQUAL, 1, 1);
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     glEnable(GL_CLIP_PLANE0);
-    glClipPlane(GL_CLIP_PLANE0, eqr); // 设置剪切平面为地面，并设置的法线为向下
+    glClipPlane(GL_CLIP_PLANE0, eqr);
 
-    glPushMatrix(); { // 保存当前的矩阵
-        glScalef(1.0, 1.0, -1.0);
-        basketBall->render(); // 绘制反射的球
-    } glPopMatrix(); // 弹出保存的矩阵
+    Point3D reboundPos = basket[0]->getRebound()->translate;
+
+    glPushMatrix(); {
+      glTranslatef(0, 2 * reboundPos._y, 0);
+      glScalef(1.0, -1.0, 1.0);
+      basketBall->render();
+      net[0]->render();
+    } glPopMatrix();
 
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_STENCIL_TEST);
@@ -179,15 +190,52 @@ void GLWidget::paintGL()
     glDisable(GL_LIGHTING);
     glColor4f(0.8, 0.8, 0.8, 0.8);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  }
-  else
-    glColor3f(1.0, 1.0, 1.0);
-  floor->render();
-  if (mirror)
-  {
+    basket[0]->renderRebound();
     glEnable(GL_LIGHTING);
     glDisable(GL_BLEND);
   }
+
+  if (mirror1)
+  {
+    double eqr[] = {0.0, -1.0, 0.0, 0.0};
+    glColorMask(0, 0, 0, 0);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_ALWAYS, 1, 1);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    glDisable(GL_DEPTH_TEST);
+    basket[1]->renderRebound();
+    glEnable(GL_DEPTH_TEST);
+    glColorMask(1, 1, 1, 1);
+    glStencilFunc(GL_EQUAL, 1, 1);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    glEnable(GL_CLIP_PLANE0);
+    glClipPlane(GL_CLIP_PLANE0, eqr);
+
+    Point3D reboundPos = basket[1]->getRebound()->translate;
+
+    glPushMatrix(); {
+      glTranslatef(0, 2 * reboundPos._y, 0);
+      glScalef(1.0, -1.0, 1.0);
+      basketBall->render();
+      net[1]->render();
+    } glPopMatrix();
+
+    glDisable(GL_CLIP_PLANE0);
+    glDisable(GL_STENCIL_TEST);
+    glEnable(GL_BLEND);
+    glDisable(GL_LIGHTING);
+    glColor4f(0.8, 0.8, 0.8, 0.8);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    basket[1]->renderRebound();
+    glEnable(GL_LIGHTING);
+    glDisable(GL_BLEND);
+  }
+  if (!mirror0)
+    basket[0]->renderRebound();
+  if (!mirror1)
+    basket[1]->renderRebound();
+  glColor3f(1, 1, 1);
+  floor->render();
   basketBall->render();
 
   basket[0]->render();
@@ -428,6 +476,12 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
     break;
   case Qt::Key_P:
     builtInOperation = 14;
+    break;
+  case Qt::Key_BracketLeft:
+    mirror1 = !mirror1;
+    break;
+  case Qt::Key_BracketRight:
+    mirror0 = !mirror0;
     break;
   }
   if (builtInOperation >= 0)

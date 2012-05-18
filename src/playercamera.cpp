@@ -2,10 +2,18 @@
 
 #include <QtOpenGL>
 
-PlayerCamera::PlayerCamera(Point3D playerPos, double initT, double initF) :
+PlayerCamera::PlayerCamera(Point3D playerPos, double initT, double initF,
+                           double xFrom, double xTo, double yFrom,
+                           double yTo, double zFrom, double zTo) :
     pos(playerPos),
     t(initT),
-    f(initF)
+    f(initF),
+    _xFrom(xFrom),
+    _xTo(xTo),
+    _yFrom(yFrom),
+    _yTo(yTo),
+    _zFrom(zFrom),
+    _zTo(zTo)
 {
 }
 

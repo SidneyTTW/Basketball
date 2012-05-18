@@ -30,6 +30,11 @@ public:
   void render();
 
   /**
+   * Render rebound.
+   */
+  void renderRebound();
+
+  /**
    * @return The rebound.
    */
   inline Flat *getRebound()

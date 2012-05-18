@@ -19,14 +19,14 @@ Basket::Basket(Point3D translate, double t, MyWorld *world) :
     model->Load(MyGlobal::BASKET_3DS_PATH);
   }
 
-  rebound = new Flat(MyGlobal::REBOUND_WIDTH / 2,
-                     MyGlobal::REBOUND_HEIGHT / 2);
+  rebound = new Flat(MyGlobal::REBOUND_WIDTH / 2 - 0.03,
+                     MyGlobal::REBOUND_HEIGHT / 2 - 0.02);
   rebound->translate = translate;
   double yDirection = qCos(t);
   rebound->translate += Point3D(0,
-                                0.4 * yDirection,
+                                0.41 * yDirection,
                                 MyGlobal::REBOUND_BOTTOM +
-                                MyGlobal::REBOUND_HEIGHT / 2 - 0.07);
+                                MyGlobal::REBOUND_HEIGHT / 2 - 0.08);
   world->addStaticXZFlat(rebound);
 
   ring = new Ring(MyGlobal::BASKET_INNER_RADIUS + 0.08,
@@ -51,23 +51,6 @@ void Basket::render()
 
   glPopMatrix();
 
-//  glDisable(GL_TEXTURE_2D);
-//  glColor3f(1, 0, 0);
-//  glBegin(GL_QUADS);
-//  glVertex3f(rebound->translate._x - rebound->size1,
-//             rebound->translate._y,
-//             rebound->translate._z + rebound->size2);
-//  glVertex3f(rebound->translate._x + rebound->size1,
-//             rebound->translate._y,
-//             rebound->translate._z + rebound->size2);
-//  glVertex3f(rebound->translate._x + rebound->size1,
-//             rebound->translate._y,
-//             rebound->translate._z - rebound->size2);
-//  glVertex3f(rebound->translate._x - rebound->size1,
-//             rebound->translate._y,
-//             rebound->translate._z - rebound->size2);
-//  glEnd();
-
 //  GLUquadric* quadric = gluNewQuadric();
 //  gluQuadricNormals(quadric, GL_SMOOTH);
 //  gluQuadricTexture(quadric, GL_TRUE);
@@ -76,6 +59,26 @@ void Basket::render()
 //  gluSphere(quadric, ring->R, 32, 32);
 
 //  gluDeleteQuadric(quadric);
+}
+
+void Basket::renderRebound()
+{
+  glDisable(GL_TEXTURE_2D);
+  glColor4f(1, 1, 1, 0.5);
+  glBegin(GL_QUADS);
+  glVertex3f(rebound->translate._x - rebound->size1,
+             rebound->translate._y,
+             rebound->translate._z + rebound->size2);
+  glVertex3f(rebound->translate._x + rebound->size1,
+             rebound->translate._y,
+             rebound->translate._z + rebound->size2);
+  glVertex3f(rebound->translate._x + rebound->size1,
+             rebound->translate._y,
+             rebound->translate._z - rebound->size2);
+  glVertex3f(rebound->translate._x - rebound->size1,
+             rebound->translate._y,
+             rebound->translate._z - rebound->size2);
+  glEnd();
 }
 
 Basket::~Basket()
