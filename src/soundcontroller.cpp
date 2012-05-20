@@ -81,7 +81,7 @@ void SoundController::playSound
   if (dis < 1)
     FSOUND_SetVolume(sounds[type].channel, 255 * volumn);
   else
-    FSOUND_SetVolume(sounds[type].channel, 255 / ((dis + 9) / 5));
+    FSOUND_SetVolume(sounds[type].channel, 255 * volumn / ((dis + 9) / 5));
 
   FSOUND_SetPaused(sounds[type].channel, false);
   sounds[type].position = pos;
