@@ -64,6 +64,10 @@ void Basket::render()
 void Basket::renderRebound()
 {
   glDisable(GL_TEXTURE_2D);
+  glPushMatrix();
+  glRotatef(_t * 180 / PI, 0, 0, 1);
+  glNormal3f(0, -1, 0);
+  glPopMatrix();
   glColor4f(1, 1, 1, 0.5);
   glBegin(GL_QUADS);
   glVertex3f(rebound->translate._x - rebound->size1,
