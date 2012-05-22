@@ -34,7 +34,7 @@ void BasketBall::render()
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, texture);
 
-    glColor3f(1.0f, 0.5f, 0.5f);
+    glColor3f(0.8f, 0.5f, 0.5f);
 //    gluQuadricTexture(quadric, GL_TRUE);
     gluSphere(quadric, MyGlobal::BASKETBALL_RADIUS, 32, 32);
 

@@ -53,6 +53,11 @@ Point3D GLWidget::builtInSpeeds[15] =
   Point3D(-3.5, 2.5, 6.5)
 };
 
+GLfloat ambient[] = {0.1f, 0.1f, 0.1f, 1.0f};
+GLfloat diffuse[] = {0.9f, 0.9f, 0.9f, 1.0f};
+GLfloat position[] = {0.0f, 0.0f, 20.0f};
+GLfloat spotDir[] = {0.0f, 0.0f, -20.0f};
+
 GLWidget::GLWidget() :
     cameraType(TypeAudience),
     speed(25),
@@ -133,13 +138,17 @@ void GLWidget::initializeGL()
           SIGNAL(ballThroughRing(Ball*,Ring*,bool)),
           SLOT(score(Ball*,Ring*,bool)));
 
+  glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+  glLightfv(GL_LIGHT0, GL_POSITION, position);
+
   glEnable(GL_LIGHT0);
   glEnable(GL_LIGHTING);
   glEnable(GL_COLOR_MATERIAL);
 
   glClearColor(0.2f, 0.2f, 0.2f, 0.5f);
   glClearDepth(1.0f);
-  glClearStencil(0); // ÉèÖÃÃÉ°åÖµ
+  glClearStencil(0);
   glDepthFunc(GL_LEQUAL);
   glEnable(GL_DEPTH_TEST);
   glShadeModel(GL_SMOOTH);
@@ -158,6 +167,10 @@ void GLWidget::paintGL()
   paintPower();
 
   cameras[(int) cameraType]->look();
+
+  glEnable(GL_LIGHTING);
+  floor->render();
+  basketBall->render();
 
   if (mirror0)
   {
@@ -186,6 +199,8 @@ void GLWidget::paintGL()
 
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_STENCIL_TEST);
+    glEnable(GL_LIGHTING);
+    basket[0]->render();
     glEnable(GL_BLEND);
     glDisable(GL_LIGHTING);
     glColor4f(0.8, 0.8, 0.8, 0.8);
@@ -222,6 +237,8 @@ void GLWidget::paintGL()
 
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_STENCIL_TEST);
+    glEnable(GL_LIGHTING);
+    basket[1]->render();
     glEnable(GL_BLEND);
     glDisable(GL_LIGHTING);
     glColor4f(0.8, 0.8, 0.8, 0.8);
@@ -231,15 +248,15 @@ void GLWidget::paintGL()
     glDisable(GL_BLEND);
   }
   if (!mirror0)
+  {
     basket[0]->renderRebound();
+    basket[0]->render();
+  }
   if (!mirror1)
+  {
     basket[1]->renderRebound();
-  glColor3f(1, 1, 1);
-  floor->render();
-  basketBall->render();
-
-  basket[0]->render();
-  basket[1]->render();
+    basket[1]->render();
+  }
 
   net[0]->render();
   net[1]->render();

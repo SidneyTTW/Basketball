@@ -20,6 +20,8 @@ void Floor::render()
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, texture);
 
+  glColor3f(0.8, 0.8, 0.8);
+
   glBegin(GL_QUADS);
     glNormal3f(0.0, 0.0, 1.0);
     glTexCoord2f(0.0f, 0.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2,
