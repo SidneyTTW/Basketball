@@ -401,7 +401,7 @@ void GLWidget::bounceBallFlat(Ball *ball, Flat *flat)
   }
 //  else
 //    qDebug() << "bounce other";
-  double volumn = qBound(0.0, v / 10, 1.0);
+  double volumn = qBound(0.0, v / 5, 1.0);
   SoundController::playSound(SoundController::BounceFlat, ball->translate, volumn);
   mayBeOpenShot = false;
 }
@@ -423,7 +423,7 @@ void GLWidget::score(Ball *ball, Ring *ring, bool openShot)
   double v = qSqrt(ball->speed._x * ball->speed._x +
                    ball->speed._y * ball->speed._y +
                    ball->speed._z * ball->speed._z);
-  double volumn = qBound(0.0, v / 10, 1.0);
+  double volumn = qBound(0.0, v / 5, 1.0);
   if (ring == basket[0]->getRing())
     net[0]->setOffset(calculateAngle(ball->speed._x, ball->speed._y),
                       v / 10);

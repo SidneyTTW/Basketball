@@ -46,7 +46,7 @@ void SoundController::init()
                            0,
                            0);
   int channel = FSOUND_Stream_PlayEx(FSOUND_FREE, bgm, NULL, true);
-  FSOUND_SetVolume(channel, 10);
+  FSOUND_SetVolume(channel, 2);
   FSOUND_SetPaused(channel, false);
 
   footstep = FSOUND_Sample_Load(FSOUND_UNMANAGED,
@@ -55,14 +55,14 @@ void SoundController::init()
                                 0,
                                 0);
   footstepChannel = FSOUND_PlaySoundEx(FSOUND_FREE, footstep, NULL, true);
-  FSOUND_SetVolume(footstepChannel, 250);
+  FSOUND_SetVolume(footstepChannel, 30);
   FSOUND_SetPaused(footstepChannel, true);
 }
 
 void SoundController::playSound
     (BuiltInSoundType type, Point3D pos, double volumn)
 {
-  if (volumn <= 0.05)
+  if (volumn <= 0.03 && volumn != OpenShot)
     return;
 
 //  float pos2[3];
