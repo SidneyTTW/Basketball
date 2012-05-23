@@ -35,12 +35,10 @@ inline void lowerSpeed(double& v,
 
 inline void rotateFreeBall(Ball& ball, double timeInterval)
 {
-  rotate(ball.rotate._x,
-         ball.rotate._y,
-         ball.rotate._z,
-         ball.rotateSpeed._x,
-         ball.rotateSpeed._y,
-         ball.rotateSpeed._z * timeInterval);
+  ball.rotate(Point3D(qSin(ball.rotateSpeed._y) * qCos(ball.rotateSpeed._x),
+                      qSin(ball.rotateSpeed._y) * qSin(ball.rotateSpeed._x),
+                      qCos(ball.rotateSpeed._y)),
+              ball.rotateSpeed._z * timeInterval * 180 / PI);
 }
 
 inline void bounceBallWithoutGravity(Ball& ball, Point3D touchPos)

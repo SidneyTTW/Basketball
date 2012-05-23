@@ -18,18 +18,11 @@ BasketBall::BasketBall() :
 
 void BasketBall::render()
 {
-  autoAdjustAngle(rotate._x);
-  autoAdjustAngle(rotate._z);
-  while (rotate._y < 0)
-    rotate._y += PI;
-  while (rotate._y > PI)
-    rotate._y -= PI;
 
   glPushMatrix();
   glTranslatef(translate._x, translate._y, translate._z);
 
-  glRotatef(rotate._z * 180 / PI, 0.0f, 0.0f, 1.0f);
-  glRotatef(rotate._y * 180 / PI, -qSin(rotate._x - rotate._z), qCos(rotate._x - rotate._z), 0.0f);
+  glMultMatrixf(matrix);
 
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, texture);

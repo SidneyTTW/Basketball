@@ -1,6 +1,7 @@
 #ifndef BALL_H
 #define BALL_H
 
+#include <QtOpenGL>
 #include "point3d.h"
 
 /**
@@ -20,11 +21,6 @@ public:
   Point3D translate;
 
   /**
-   * The rotate.
-   */
-  Point3D rotate;
-
-  /**
    * The translate speed.
    */
   Point3D speed;
@@ -38,6 +34,16 @@ public:
    * The radius.
    */
   double r;
+
+  /**
+   * Rotate the ball.
+   */
+  void rotate(Point3D direction, double angle);
+
+  /**
+   * The matrix.
+   */
+  GLfloat matrix[16];
 };
 
 #endif // BALL_H

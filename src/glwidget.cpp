@@ -77,9 +77,8 @@ void GLWidget::initializeGL()
 {
   basketBall = new BasketBall();
   basketBall->translate = Point3D(0, 0, 0.123);
-  basketBall->speed = Point3D(0.3, -1, 0);
-  basketBall->rotate = Point3D(4.90112, 0.406457, 4.00997);
-  basketBall->rotateSpeed = Point3D(3.75085, 1.5708, 13.3739);
+  basketBall->speed = Point3D();
+  basketBall->rotateSpeed = Point3D();
 
   floor = new Floor();
 

@@ -3,8 +3,6 @@
 
 #include "ball.h"
 
-#include <QtOpenGL>
-
 /**
  * Class of basketball.
  */
