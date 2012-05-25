@@ -157,6 +157,11 @@ private:
    */
   void paintPower();
 
+  /**
+   * Draw the shadow of the basketball.
+   */
+  void paintShadow();
+
 private slots:
   /**
    * A slot called to advance.

@@ -5,6 +5,10 @@
 
 int Floor::texture = -1;
 
+static float materialAmbient[4] = {1.0, 1.0, 1.0, 1.0};
+static float materialDiffuse[4] = {1.0, 1.0, 1.0, 1.0};
+static float materialSpecular[4] = {0.3, 0.3, 0.3, 1.0};
+
 Floor::Floor() :
     Flat(MyGlobal::GYM_WIDTH / 2, MyGlobal::GYM_LENGTH / 2)
 {
@@ -14,6 +18,9 @@ Floor::Floor() :
 
 void Floor::render()
 {
+  glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbient);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDiffuse);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
   glPushMatrix();
   glTranslatef(translate._x, translate._y, translate._z);
 

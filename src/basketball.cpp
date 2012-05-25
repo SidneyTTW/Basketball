@@ -6,6 +6,10 @@
 
 int BasketBall::texture = -1;
 
+static float materialAmbient[4] = {1.0, 1.0, 1.0, 1.0};
+static float materialDiffuse[4] = {1.0, 1.0, 1.0, 1.0};
+static float materialSpecular[4] = {0.0, 0.0, 0.0, 1.0};
+
 BasketBall::BasketBall() :
     Ball(MyGlobal::BASKETBALL_RADIUS)
 {
@@ -18,6 +22,9 @@ BasketBall::BasketBall() :
 
 void BasketBall::render()
 {
+  glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbient);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDiffuse);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
 
   glPushMatrix();
   glTranslatef(translate._x, translate._y, translate._z);

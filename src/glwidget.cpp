@@ -167,7 +167,8 @@ void GLWidget::paintGL()
 
   cameras[(int) cameraType]->look();
 
-  glEnable(GL_LIGHTING);
+//  glEnable(GL_LIGHTING);
+//  glEnable(GL_BLEND);
   floor->render();
   basketBall->render();
 
@@ -259,6 +260,9 @@ void GLWidget::paintGL()
 
   net[0]->render();
   net[1]->render();
+
+  glEnable(GL_BLEND);
+  paintShadow();
 
   glFlush();
 }
@@ -628,6 +632,29 @@ void GLWidget::paintPower()
     glColor3ub(255 * percentage, 255 - 255 * percentage, 0);
     glVertex3f(-0.25, -0.2 + 0.2 * percentage, -0.5);
     glVertex3f(-0.25 + 0.05 * percentage, -0.2 + 0.2 * percentage, -0.5);
+  glEnd();
+}
+
+static float shadowAmbient[4] = {1.0, 1.0, 1.0, 1.0};
+static float shadowDiffuse[4] = {1.0, 1.0, 1.0, 1.0};
+static float shadowSpecular[4] = {0.0, 0.0, 0.0, 0.0};
+
+void GLWidget::paintShadow()
+{
+  glMaterialfv(GL_FRONT, GL_AMBIENT, shadowAmbient);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, shadowDiffuse);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, shadowSpecular);
+  Point3D lightPos = Point3D(position[0], position[1], position[2]);
+  Point3D shadowCenter = lightPos +
+                         (basketBall->translate - lightPos) *
+                         (lightPos._z / (lightPos._z - basketBall->translate._z));
+  glNormal3f(0, 0, 1);
+  glColor4f(0.5, 0.5, 0.5, 0.5);
+  glBegin(GL_POLYGON);
+    for(double angle = 0;angle <= (2.0 * PI);angle += 0.1f)
+      glVertex3f(shadowCenter._x + basketBall->r * qSin(angle),
+                 shadowCenter._y + basketBall->r * qCos(angle),
+                 0.01);
   glEnd();
 }
 

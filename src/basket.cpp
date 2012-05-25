@@ -7,6 +7,10 @@
 #include "myworld.h"
 #include "ring.h"
 
+static float materialAmbient[4] = {1.0, 1.0, 1.0, 1.0};
+static float materialDiffuse[4] = {1.0, 1.0, 1.0, 1.0};
+static float materialSpecular[4] = {0.1, 0.1, 0.1, 1.0};
+
 C3DSModel *Basket::model = NULL;
 
 Basket::Basket(Point3D translate, double t, MyWorld *world) :
@@ -38,6 +42,9 @@ Basket::Basket(Point3D translate, double t, MyWorld *world) :
 
 void Basket::render()
 {
+  glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbient);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDiffuse);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
   glPushMatrix();
 
   glTranslatef(_translate._x, _translate._y, _translate._z);
@@ -63,6 +70,9 @@ void Basket::render()
 
 void Basket::renderRebound()
 {
+  glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbient);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDiffuse);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
   glDisable(GL_TEXTURE_2D);
   glPushMatrix();
   glRotatef(_t * 180 / PI, 0, 0, 1);
