@@ -5,9 +5,9 @@
 
 int Floor::texture = -1;
 
-static float materialAmbient[4] = {1.0, 1.0, 1.0, 1.0};
-static float materialDiffuse[4] = {1.0, 1.0, 1.0, 1.0};
-static float materialSpecular[4] = {0.3, 0.3, 0.3, 1.0};
+float Floor::materialAmbient[4] = {0.2, 0.2, 0.2, 1.0};
+float Floor::materialDiffuse[4] = {1.0, 1.0, 1.0, 1.0};
+float Floor::materialSpecular[4] = {0.0, 0.0, 0.0, 1.0};
 
 Floor::Floor() :
     Flat(MyGlobal::GYM_WIDTH / 2, MyGlobal::GYM_LENGTH / 2)
@@ -18,6 +18,7 @@ Floor::Floor() :
 
 void Floor::render()
 {
+  glEnable(GL_COLOR_MATERIAL);
   glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbient);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDiffuse);
   glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
@@ -26,8 +27,6 @@ void Floor::render()
 
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, texture);
-
-  glColor3f(0.8, 0.8, 0.8);
 
   glBegin(GL_QUADS);
     glNormal3f(0.0, 0.0, 1.0);

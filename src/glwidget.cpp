@@ -53,10 +53,11 @@ Point3D GLWidget::builtInSpeeds[15] =
   Point3D(-3.5, 2.5, 6.5)
 };
 
-GLfloat ambient[] = {0.1f, 0.1f, 0.1f, 1.0f};
-GLfloat diffuse[] = {0.9f, 0.9f, 0.9f, 1.0f};
-GLfloat position[] = {0.0f, 0.0f, 20.0f};
-GLfloat spotDir[] = {0.0f, 0.0f, -20.0f};
+GLfloat ambient[] = {0.2f, 0.2f, 0.2f, 1.0f};
+GLfloat diffuse[] = {1.0f, 1.0f, 1.0f, 1.0f};
+GLfloat specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
+GLfloat position[] = {0.0f, 0.0f, 10.0f};
+GLfloat spotDir[] = {0.0f, 0.0f, -10.0f};
 
 GLWidget::GLWidget() :
     cameraType(TypeAudience),
@@ -137,14 +138,6 @@ void GLWidget::initializeGL()
           SIGNAL(ballThroughRing(Ball*,Ring*,bool)),
           SLOT(score(Ball*,Ring*,bool)));
 
-  glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
-  glLightfv(GL_LIGHT0, GL_POSITION, position);
-
-  glEnable(GL_LIGHT0);
-  glEnable(GL_LIGHTING);
-  glEnable(GL_COLOR_MATERIAL);
-
   glClearColor(0.2f, 0.2f, 0.2f, 0.5f);
   glClearDepth(1.0f);
   glClearStencil(0);
@@ -152,13 +145,21 @@ void GLWidget::initializeGL()
   glEnable(GL_DEPTH_TEST);
   glShadeModel(GL_SMOOTH);
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
-  glEnable(GL_TEXTURE_2D);
 }
 
 void GLWidget::paintGL()
 {
+  Point3D fromPos = cameras[(int) cameraType]->fromPos();
+
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+  glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);
+  glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuse);
+  glLightfv(GL_LIGHT1, GL_SPECULAR, specular);
+  glLightfv(GL_LIGHT1, GL_POSITION, position);
+
+  glEnable(GL_LIGHT1);
+  glEnable(GL_LIGHTING);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -167,10 +168,46 @@ void GLWidget::paintGL()
 
   cameras[(int) cameraType]->look();
 
-//  glEnable(GL_LIGHTING);
-//  glEnable(GL_BLEND);
-  floor->render();
-  basketBall->render();
+  glEnable(GL_LIGHTING);
+  glEnable(GL_BLEND);
+  if (true)
+  {
+    double eqr[] = {0.0, 0.0, -1.0, 0.0};
+    glColorMask(0, 0, 0, 0);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_ALWAYS, 1, 1);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    glDisable(GL_DEPTH_TEST);
+    floor->render();
+    glEnable(GL_DEPTH_TEST);
+    glColorMask(1, 1, 1, 1);
+    glStencilFunc(GL_EQUAL, 1, 1);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    glEnable(GL_CLIP_PLANE0);
+    glClipPlane(GL_CLIP_PLANE0, eqr);
+    glDisable(GL_LIGHTING);
+
+    glPushMatrix(); {
+      glScalef(1.0, 1.0, -1.0);
+      basketBall->render();
+      basket[0]->render();
+      basket[1]->render();
+    } glPopMatrix();
+
+    glDisable(GL_CLIP_PLANE0);
+    glDisable(GL_STENCIL_TEST);
+    glEnable(GL_LIGHTING);
+    basketBall->render();
+    basket[0]->render();
+    basket[1]->render();
+    glEnable(GL_BLEND);
+    glDisable(GL_LIGHTING);
+    glColor4f(0.8, 0.8, 0.8, 0.7);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    floor->render();
+    glEnable(GL_LIGHTING);
+    glDisable(GL_BLEND);
+  }
 
   if (mirror0)
   {
@@ -189,18 +226,33 @@ void GLWidget::paintGL()
     glClipPlane(GL_CLIP_PLANE0, eqr);
 
     Point3D reboundPos = basket[0]->getRebound()->translate;
+    double width = basket[0]->getRebound()->size1;
+    double height = basket[0]->getRebound()->size2;
+    Point3D reflectPos = Point3D(basketBall->translate._x,
+                                 reboundPos._y * 2 - basketBall->translate._y,
+                                 basketBall->translate._z);
+    Point3D touchPos = fromPos + (reflectPos - fromPos) *
+                       ((reboundPos._y - fromPos._y) /
+                        (reflectPos._y - fromPos._y));
+    bool canReflectBall = ((fromPos._y < reboundPos._y &&
+                            touchPos._y > reboundPos._y ) ||
+                           (fromPos._y > reboundPos._y &&
+                            touchPos._y < reboundPos._y )) &&
+                          (touchPos._x >= reboundPos._x - width &&
+                           touchPos._x <= reboundPos._x + width &&
+                           touchPos._z >= reboundPos._z - height &&
+                           touchPos._z <= reboundPos._z + height);
 
     glPushMatrix(); {
       glTranslatef(0, 2 * reboundPos._y, 0);
       glScalef(1.0, -1.0, 1.0);
-      basketBall->render();
+      if (canReflectBall)
+        basketBall->render();
       net[0]->render();
     } glPopMatrix();
 
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_STENCIL_TEST);
-    glEnable(GL_LIGHTING);
-    basket[0]->render();
     glEnable(GL_BLEND);
     glDisable(GL_LIGHTING);
     glColor4f(0.8, 0.8, 0.8, 0.8);
@@ -227,18 +279,33 @@ void GLWidget::paintGL()
     glClipPlane(GL_CLIP_PLANE0, eqr);
 
     Point3D reboundPos = basket[1]->getRebound()->translate;
+    double width = basket[1]->getRebound()->size1;
+    double height = basket[1]->getRebound()->size2;
+    Point3D reflectPos = Point3D(basketBall->translate._x,
+                                 reboundPos._y * 2 - basketBall->translate._y,
+                                 basketBall->translate._z);
+    Point3D touchPos = fromPos + (reflectPos - fromPos) *
+                       ((reboundPos._y - fromPos._y) /
+                        (reflectPos._y - fromPos._y));
+    bool canReflectBall = ((fromPos._y < reboundPos._y &&
+                            touchPos._y > reboundPos._y ) ||
+                           (fromPos._y > reboundPos._y &&
+                            touchPos._y < reboundPos._y )) &&
+                          (touchPos._x >= reboundPos._x - width &&
+                           touchPos._x <= reboundPos._x + width &&
+                           touchPos._z >= reboundPos._z - height &&
+                           touchPos._z <= reboundPos._z + height);
 
     glPushMatrix(); {
       glTranslatef(0, 2 * reboundPos._y, 0);
       glScalef(1.0, -1.0, 1.0);
-      basketBall->render();
+      if (canReflectBall)
+        basketBall->render();
       net[1]->render();
     } glPopMatrix();
 
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_STENCIL_TEST);
-    glEnable(GL_LIGHTING);
-    basket[1]->render();
     glEnable(GL_BLEND);
     glDisable(GL_LIGHTING);
     glColor4f(0.8, 0.8, 0.8, 0.8);
@@ -248,20 +315,20 @@ void GLWidget::paintGL()
     glDisable(GL_BLEND);
   }
   if (!mirror0)
-  {
     basket[0]->renderRebound();
-    basket[0]->render();
-  }
+
   if (!mirror1)
-  {
     basket[1]->renderRebound();
+
+  if (false)
+  {
+    basket[0]->render();
     basket[1]->render();
   }
 
   net[0]->render();
   net[1]->render();
 
-  glEnable(GL_BLEND);
   paintShadow();
 
   glFlush();
@@ -608,8 +675,7 @@ void GLWidget::paintPower()
 
   double percentage = qAbs(qSin(forceAngle));
   glDisable(GL_TEXTURE_2D);
-
-  glNormal3f(0, 0, 1);
+  glDisable(GL_LIGHTING);
 
   glBegin(GL_LINES);
     glColor3ub(50, 220, 50);
@@ -633,6 +699,8 @@ void GLWidget::paintPower()
     glVertex3f(-0.25, -0.2 + 0.2 * percentage, -0.5);
     glVertex3f(-0.25 + 0.05 * percentage, -0.2 + 0.2 * percentage, -0.5);
   glEnd();
+
+  glEnable(GL_LIGHTING);
 }
 
 static float shadowAmbient[4] = {1.0, 1.0, 1.0, 1.0};
@@ -641,6 +709,7 @@ static float shadowSpecular[4] = {0.0, 0.0, 0.0, 0.0};
 
 void GLWidget::paintShadow()
 {
+  glEnable(GL_BLEND);
   glMaterialfv(GL_FRONT, GL_AMBIENT, shadowAmbient);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, shadowDiffuse);
   glMaterialfv(GL_FRONT, GL_SPECULAR, shadowSpecular);
@@ -648,12 +717,13 @@ void GLWidget::paintShadow()
   Point3D shadowCenter = lightPos +
                          (basketBall->translate - lightPos) *
                          (lightPos._z / (lightPos._z - basketBall->translate._z));
+  double r = basketBall->r * lightPos._z / (lightPos._z - basketBall->translate._z);
   glNormal3f(0, 0, 1);
-  glColor4f(0.5, 0.5, 0.5, 0.5);
+  glColor4f(0.0, 0.0, 0.0, qBound(0.0, 0.5 - basketBall->translate._z / lightPos._z * 2, 1.0));
   glBegin(GL_POLYGON);
     for(double angle = 0;angle <= (2.0 * PI);angle += 0.1f)
-      glVertex3f(shadowCenter._x + basketBall->r * qSin(angle),
-                 shadowCenter._y + basketBall->r * qCos(angle),
+      glVertex3f(shadowCenter._x + r * qSin(angle),
+                 shadowCenter._y + r * qCos(angle),
                  0.01);
   glEnd();
 }

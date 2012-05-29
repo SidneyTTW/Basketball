@@ -1,14 +1,17 @@
 #include "basketball.h"
 
+#include <GL/glext.h>
 #include <qmath.h>
 #include "glaid.h"
 #include "myglobal.h"
 
 int BasketBall::texture = -1;
 
-static float materialAmbient[4] = {1.0, 1.0, 1.0, 1.0};
-static float materialDiffuse[4] = {1.0, 1.0, 1.0, 1.0};
-static float materialSpecular[4] = {0.0, 0.0, 0.0, 1.0};
+float BasketBall::materialAmbient[4] = {0.5, 0.5, 0.5, 1.0};
+float BasketBall::materialDiffuse[4] = {0.8, 0.8, 0.8, 1.0};
+float BasketBall::materialSpecular[4] = {0.5, 0.5, 0.5, 1.0};
+float BasketBall::materialShininess[1] = {10.0};
+float BasketBall::originalShininess[1] = {1000.0};
 
 BasketBall::BasketBall() :
     Ball(MyGlobal::BASKETBALL_RADIUS)
@@ -22,9 +25,11 @@ BasketBall::BasketBall() :
 
 void BasketBall::render()
 {
+  glEnable(GL_COLOR_MATERIAL);
   glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbient);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDiffuse);
   glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
+  glMaterialfv(GL_FRONT, GL_SHININESS, materialShininess);
 
   glPushMatrix();
   glTranslatef(translate._x, translate._y, translate._z);
@@ -34,23 +39,14 @@ void BasketBall::render()
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, texture);
 
-    glColor3f(0.8f, 0.5f, 0.5f);
-//    gluQuadricTexture(quadric, GL_TRUE);
-    gluSphere(quadric, MyGlobal::BASKETBALL_RADIUS, 32, 32);
+  glColor3ub(180, 120, 0);
+  gluSphere(quadric, MyGlobal::BASKETBALL_RADIUS, 32, 32);
 
-//  glColor4f(1.0, 1.0, 1.0, 0.4);
-//  glEnable(GL_BLEND);
-//  glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-//  glEnable(GL_TEXTURE_GEN_S);
-//  glEnable(GL_TEXTURE_GEN_T);
-
-//  gluSphere(quadric, MyGlobal::BASKETBALL_RADIUS, 32, 32);
-//  glDisable(GL_TEXTURE_GEN_S);
-//  glDisable(GL_TEXTURE_GEN_T);
-//  glDisable(GL_BLEND);
-
+  glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
   glDisable(GL_TEXTURE_2D);
   glPopMatrix();
+
+  glMaterialfv(GL_FRONT, GL_SHININESS, originalShininess);
 }
 
 BasketBall::~BasketBall()

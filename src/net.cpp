@@ -9,6 +9,10 @@
 #define NET_TOP           (-STRANGLE_OFFSET_Z)
 #define NET_BOTTOM        (-0.746 - STRANGLE_OFFSET_Z)
 
+float Net::materialAmbient[4] = {0.2, 0.2, 0.2, 1.0};
+float Net::materialDiffuse[4] = {1.0, 1.0, 1.0, 1.0};
+float Net::materialSpecular[4] = {0.0, 0.0, 0.0, 1.0};
+
 Net::Net(Point3D translate) :
     anim(-1),
     _translate(translate),
@@ -21,6 +25,10 @@ Net::Net(Point3D translate) :
 
 void Net::render()
 {
+  glEnable(GL_COLOR_MATERIAL);
+  glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbient);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDiffuse);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
   glPushMatrix();
   glTranslatef(_translate._x, _translate._y, _translate._z);
   glRotatef(_rotate * 180 / PI, 0, 0, 1);

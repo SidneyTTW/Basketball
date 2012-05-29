@@ -88,6 +88,10 @@ private:
    * The model, should be init only once.
    */
   static C3DSModel *model;
+
+  static float materialAmbient[4];
+  static float materialDiffuse[4];
+  static float materialSpecular[4];
 };
 
 #endif // BASKET_H

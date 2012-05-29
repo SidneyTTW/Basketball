@@ -71,6 +71,10 @@ private:
    * The t.
    */
   double _t;
+
+  static float materialAmbient[4];
+  static float materialDiffuse[4];
+  static float materialSpecular[4];
 };
 
 #endif // NET_H
