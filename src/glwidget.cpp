@@ -53,7 +53,7 @@ Point3D GLWidget::builtInSpeeds[15] =
   Point3D(-3.5, 2.5, 6.5)
 };
 
-GLfloat ambient[] = {0.2f, 0.2f, 0.2f, 1.0f};
+GLfloat ambient[] = {0.25f, 0.25f, 0.25f, 1.0f};
 GLfloat diffuse[] = {1.0f, 1.0f, 1.0f, 1.0f};
 GLfloat specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
 GLfloat position[] = {0.0f, 0.0f, 10.0f};
@@ -235,9 +235,9 @@ void GLWidget::paintGL()
                        ((reboundPos._y - fromPos._y) /
                         (reflectPos._y - fromPos._y));
     bool canReflectBall = ((fromPos._y < reboundPos._y &&
-                            touchPos._y > reboundPos._y ) ||
+                            reflectPos._y > reboundPos._y ) ||
                            (fromPos._y > reboundPos._y &&
-                            touchPos._y < reboundPos._y )) &&
+                            reflectPos._y < reboundPos._y )) &&
                           (touchPos._x >= reboundPos._x - width &&
                            touchPos._x <= reboundPos._x + width &&
                            touchPos._z >= reboundPos._z - height &&
@@ -288,9 +288,9 @@ void GLWidget::paintGL()
                        ((reboundPos._y - fromPos._y) /
                         (reflectPos._y - fromPos._y));
     bool canReflectBall = ((fromPos._y < reboundPos._y &&
-                            touchPos._y > reboundPos._y ) ||
+                            reflectPos._y > reboundPos._y ) ||
                            (fromPos._y > reboundPos._y &&
-                            touchPos._y < reboundPos._y )) &&
+                            reflectPos._y < reboundPos._y )) &&
                           (touchPos._x >= reboundPos._x - width &&
                            touchPos._x <= reboundPos._x + width &&
                            touchPos._z >= reboundPos._z - height &&
