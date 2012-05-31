@@ -17,6 +17,7 @@ class Floor;
 class MyWorld;
 class Net;
 class Ring;
+class Walls;
 
 /**
  * Class of main widget.
@@ -70,7 +71,7 @@ private:
   /**
    * The walls.
    */
-  Flat *walls[4];
+  Walls *walls;
 
   /**
    * The world.

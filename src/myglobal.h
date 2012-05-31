@@ -61,6 +61,10 @@ namespace MyGlobal
   const char BASKET_3DS_PATH[] = "basket.3ds";
   const char NET_3DS_PATH[] = "net.3ds";
   const QString BASKETBALL_TEXTURE_PATH = ":/images/basketball.png";
+  const QString WALLS_TEXTURE_PATH[] = {":/images/0.png",
+                                        ":/images/1.png",
+                                        ":/images/2.png",
+                                        ":/images/3.png"};
   const QString COURT_TEXTURE_PATH = ":/images/lakers.png";
   const char * const SOUND_PATHS[] = {"sounds/basketballflat.wav",
                                       "sounds/basketballring.wav",

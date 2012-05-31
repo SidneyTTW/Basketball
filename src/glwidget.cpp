@@ -13,6 +13,7 @@
 #include "playercamera.h"
 #include "ring.h"
 #include "soundcontroller.h"
+#include "walls.h"
 #include "zcamera.h"
 
 Point3D GLWidget::builtInPositions[15] =
@@ -83,22 +84,10 @@ void GLWidget::initializeGL()
 
   floor = new Floor();
 
-  walls[0] = new Flat(MyGlobal::GYM_WIDTH, 2000);
-  walls[0]->translate = Point3D(0, MyGlobal::GYM_LENGTH / 2, 0);
-  walls[1] = new Flat(MyGlobal::GYM_WIDTH, 2000);
-  walls[1]->translate = Point3D(0, -MyGlobal::GYM_LENGTH / 2, 0);
-  walls[2] = new Flat(MyGlobal::GYM_LENGTH, 2000);
-  walls[2]->translate = Point3D(MyGlobal::GYM_WIDTH / 2, 0, 0);
-  walls[3] = new Flat(MyGlobal::GYM_LENGTH, 2000);
-  walls[3]->translate = Point3D(-MyGlobal::GYM_WIDTH / 2, 0, 0);
-
   world  = new MyWorld();
   world->addDynamicBall(basketBall);
   world->addStaticXYFlat(floor);
-  world->addStaticXZFlat(walls[0]);
-  world->addStaticXZFlat(walls[1]);
-  world->addStaticYZFlat(walls[2]);
-  world->addStaticYZFlat(walls[3]);
+  walls = new Walls(world);
 
   basket[0] = new Basket(Point3D(0, MyGlobal::BASKETBALL_COURT_LENGTH / 2 - 2.7, 0),
                          0, world);
@@ -170,6 +159,9 @@ void GLWidget::paintGL()
 
   glEnable(GL_LIGHTING);
   glEnable(GL_BLEND);
+
+  walls->render();
+
   if (true)
   {
     double eqr[] = {0.0, 0.0, -1.0, 0.0};
@@ -207,8 +199,8 @@ void GLWidget::paintGL()
     floor->render();
     glEnable(GL_LIGHTING);
     glDisable(GL_BLEND);
+    glClear(GL_STENCIL_BUFFER_BIT);
   }
-
   if (mirror0)
   {
     double eqr[] = {0.0, 1.0, 0.0, 0.0};
@@ -226,27 +218,11 @@ void GLWidget::paintGL()
     glClipPlane(GL_CLIP_PLANE0, eqr);
 
     Point3D reboundPos = basket[0]->getRebound()->translate;
-    double width = basket[0]->getRebound()->size1;
-    double height = basket[0]->getRebound()->size2;
-    Point3D reflectPos = Point3D(basketBall->translate._x,
-                                 reboundPos._y * 2 - basketBall->translate._y,
-                                 basketBall->translate._z);
-    Point3D touchPos = fromPos + (reflectPos - fromPos) *
-                       ((reboundPos._y - fromPos._y) /
-                        (reflectPos._y - fromPos._y));
-    bool canReflectBall = ((fromPos._y < reboundPos._y &&
-                            reflectPos._y > reboundPos._y ) ||
-                           (fromPos._y > reboundPos._y &&
-                            reflectPos._y < reboundPos._y )) &&
-                          (touchPos._x >= reboundPos._x - width &&
-                           touchPos._x <= reboundPos._x + width &&
-                           touchPos._z >= reboundPos._z - height &&
-                           touchPos._z <= reboundPos._z + height);
 
     glPushMatrix(); {
       glTranslatef(0, 2 * reboundPos._y, 0);
       glScalef(1.0, -1.0, 1.0);
-      if (canReflectBall)
+      if (basketBall->translate._y < reboundPos._y)
         basketBall->render();
       net[0]->render();
     } glPopMatrix();
@@ -260,6 +236,7 @@ void GLWidget::paintGL()
     basket[0]->renderRebound();
     glEnable(GL_LIGHTING);
     glDisable(GL_BLEND);
+    glClear(GL_STENCIL_BUFFER_BIT);
   }
 
   if (mirror1)
@@ -279,27 +256,11 @@ void GLWidget::paintGL()
     glClipPlane(GL_CLIP_PLANE0, eqr);
 
     Point3D reboundPos = basket[1]->getRebound()->translate;
-    double width = basket[1]->getRebound()->size1;
-    double height = basket[1]->getRebound()->size2;
-    Point3D reflectPos = Point3D(basketBall->translate._x,
-                                 reboundPos._y * 2 - basketBall->translate._y,
-                                 basketBall->translate._z);
-    Point3D touchPos = fromPos + (reflectPos - fromPos) *
-                       ((reboundPos._y - fromPos._y) /
-                        (reflectPos._y - fromPos._y));
-    bool canReflectBall = ((fromPos._y < reboundPos._y &&
-                            reflectPos._y > reboundPos._y ) ||
-                           (fromPos._y > reboundPos._y &&
-                            reflectPos._y < reboundPos._y )) &&
-                          (touchPos._x >= reboundPos._x - width &&
-                           touchPos._x <= reboundPos._x + width &&
-                           touchPos._z >= reboundPos._z - height &&
-                           touchPos._z <= reboundPos._z + height);
 
     glPushMatrix(); {
       glTranslatef(0, 2 * reboundPos._y, 0);
       glScalef(1.0, -1.0, 1.0);
-      if (canReflectBall)
+      if (basketBall->translate._y > reboundPos._y)
         basketBall->render();
       net[1]->render();
     } glPopMatrix();
@@ -313,6 +274,7 @@ void GLWidget::paintGL()
     basket[1]->renderRebound();
     glEnable(GL_LIGHTING);
     glDisable(GL_BLEND);
+    glClear(GL_STENCIL_BUFFER_BIT);
   }
   if (!mirror0)
     basket[0]->renderRebound();
@@ -332,6 +294,7 @@ void GLWidget::paintGL()
   paintShadow();
 
   glFlush();
+  glClear(GL_STENCIL_BUFFER_BIT);
 }
 
 void GLWidget::resizeGL(int width, int height)
@@ -460,12 +423,12 @@ void GLWidget::bounceBallFlat(Ball *ball, Flat *flat)
 //    qDebug() << "bounce rebound";
     v = qAbs(ball->speed._y);
   }
-  else if (flat == walls[0] || flat == walls[1])
+  else if (flat == walls->walls[0] || flat == walls->walls[1])
   {
 //    qDebug() << "bounce wall";
     v = qAbs(ball->speed._y);
   }
-  else if (flat == walls[2] || flat == walls[3])
+  else if (flat == walls->walls[2] || flat == walls->walls[3])
   {
 //    qDebug() << "bounce wall";
     v = qAbs(ball->speed._x);
@@ -735,10 +698,7 @@ GLWidget::~GLWidget()
   delete basket[0];
   delete basket[1];
   delete floor;
-  delete walls[0];
-  delete walls[1];
-  delete walls[2];
-  delete walls[3];
+  delete walls;
   delete cameras[0];
   delete cameras[1];
   delete cameras[2];
