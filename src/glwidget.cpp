@@ -216,6 +216,7 @@ void GLWidget::paintGL()
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     glEnable(GL_CLIP_PLANE0);
     glClipPlane(GL_CLIP_PLANE0, eqr);
+    glDisable(GL_LIGHTING);
 
     Point3D reboundPos = basket[0]->getRebound()->translate;
 
@@ -254,6 +255,7 @@ void GLWidget::paintGL()
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     glEnable(GL_CLIP_PLANE0);
     glClipPlane(GL_CLIP_PLANE0, eqr);
+    glDisable(GL_LIGHTING);
 
     Point3D reboundPos = basket[1]->getRebound()->translate;
 

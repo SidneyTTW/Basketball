@@ -11,6 +11,9 @@ float Walls::materialAmbient[4] = {0.2, 0.2, 0.2, 1.0};
 float Walls::materialDiffuse[4] = {1.0, 1.0, 1.0, 1.0};
 float Walls::materialSpecular[4] = {0.0, 0.0, 0.0, 1.0};
 
+#define NEAR_RATE    1.4
+#define FAR_RATE     2
+
 Walls::Walls(MyWorld *world)
 {
   walls[0] = new Flat(MyGlobal::GYM_WIDTH, 2000);
@@ -28,8 +31,8 @@ Walls::Walls(MyWorld *world)
   if (textures == NULL)
   {
     textures = new int[4];
-    textures[0] = -1;
-    textures[1] = -1;
+    textures[0] = GLAid::loadTexture(MyGlobal::WALLS_TEXTURE_PATH[0]);
+    textures[1] = GLAid::loadTexture(MyGlobal::WALLS_TEXTURE_PATH[1]);
     textures[2] = GLAid::loadTexture(MyGlobal::WALLS_TEXTURE_PATH[2]);
     textures[3] = GLAid::loadTexture(MyGlobal::WALLS_TEXTURE_PATH[3]);
   }
@@ -45,39 +48,76 @@ void Walls::render()
   glColor3ub(200, 200, 200);
 
   glEnable(GL_TEXTURE_2D);
+
+  glBindTexture(GL_TEXTURE_2D, textures[0]);
+
+  glBegin(GL_QUADS);
+    glNormal3f(0.0, -1.0, 0.0);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2 * NEAR_RATE,
+                                         MyGlobal::GYM_LENGTH / 2 * NEAR_RATE,
+                                         0.0f);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2 * NEAR_RATE,
+                                         MyGlobal::GYM_LENGTH / 2 * NEAR_RATE,
+                                         0.0f);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2 * NEAR_RATE,
+                                         MyGlobal::GYM_LENGTH / 2 * FAR_RATE,
+                                         5.0f);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2 * NEAR_RATE,
+                                         MyGlobal::GYM_LENGTH / 2 * FAR_RATE,
+                                         5.0f);
+  glEnd();
+
+  glBindTexture(GL_TEXTURE_2D, textures[1]);
+
+  glBegin(GL_QUADS);
+    glNormal3f(0.0, 1.0, 0.0);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2 * NEAR_RATE,
+                                         -MyGlobal::GYM_LENGTH / 2 * NEAR_RATE,
+                                         0.0f);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2 * NEAR_RATE,
+                                         -MyGlobal::GYM_LENGTH / 2 * NEAR_RATE,
+                                         0.0f);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2 * NEAR_RATE,
+                                         -MyGlobal::GYM_LENGTH / 2 * FAR_RATE,
+                                         5.0f);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2 * NEAR_RATE,
+                                         -MyGlobal::GYM_LENGTH / 2 * FAR_RATE,
+                                         5.0f);
+  glEnd();
+
   glBindTexture(GL_TEXTURE_2D, textures[2]);
 
   glBegin(GL_QUADS);
     glNormal3f(-1.0, 0.0, 0.0);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2 * 1.2,
-                                         MyGlobal::GYM_LENGTH / 2 * 1.2,
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2 * NEAR_RATE,
+                                         MyGlobal::GYM_LENGTH / 2 * NEAR_RATE,
                                          0.0f);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2 * 1.2,
-                                         -MyGlobal::GYM_LENGTH / 2 * 1.2,
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2 * NEAR_RATE,
+                                         -MyGlobal::GYM_LENGTH / 2 * NEAR_RATE,
                                          0.0f);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2 * 1.8,
-                                         -MyGlobal::GYM_LENGTH / 2 * 1.8,
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2 * FAR_RATE,
+                                         -MyGlobal::GYM_LENGTH / 2 * NEAR_RATE,
                                          5.0f);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2 * 1.8,
-                                         MyGlobal::GYM_LENGTH / 2 * 1.8,
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2 * FAR_RATE,
+                                         MyGlobal::GYM_LENGTH / 2 * NEAR_RATE,
                                          5.0f);
   glEnd();
 
   glBindTexture(GL_TEXTURE_2D, textures[3]);
 
   glBegin(GL_QUADS);
-    glNormal3f(-1.0, 0.0, 0.0);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2 * 1.2,
-                                         -MyGlobal::GYM_LENGTH / 2 * 1.2,
+    glNormal3f(1.0, 0.0, 0.0);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2 * NEAR_RATE,
+                                         -MyGlobal::GYM_LENGTH / 2 * NEAR_RATE,
                                          0.0f);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2 * 1.2,
-                                         MyGlobal::GYM_LENGTH / 2 * 1.2,
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2 * NEAR_RATE,
+                                         MyGlobal::GYM_LENGTH / 2 * NEAR_RATE,
                                          0.0f);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2 * 1.8,
-                                         MyGlobal::GYM_LENGTH / 2 * 1.8,
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2 * FAR_RATE,
+                                         MyGlobal::GYM_LENGTH / 2 * NEAR_RATE,
                                          5.0f);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2 * 1.8,
-                                         -MyGlobal::GYM_LENGTH / 2 * 1.8,
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2 * FAR_RATE,
+                                         -MyGlobal::GYM_LENGTH / 2 * NEAR_RATE,
                                          5.0f);
   glEnd();
 }
@@ -89,5 +129,4 @@ Walls::~Walls()
   delete walls[2];
   delete walls[3];
   delete [] walls;
-  delete [] textures;
 }
