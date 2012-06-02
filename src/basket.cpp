@@ -80,7 +80,7 @@ void Basket::renderRebound()
   glRotatef(_t * 180 / PI, 0, 0, 1);
   glNormal3f(0, -1, 0);
   glPopMatrix();
-  glColor4f(1, 1, 1, 0.5);
+  glColor4f(1, 1, 1, 0.3);
   glBegin(GL_QUADS);
   glVertex3f(rebound->translate._x - rebound->size1,
              rebound->translate._y,

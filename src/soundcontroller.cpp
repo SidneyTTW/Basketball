@@ -46,7 +46,7 @@ void SoundController::init()
                            0,
                            0);
   int channel = FSOUND_Stream_PlayEx(FSOUND_FREE, bgm, NULL, true);
-  FSOUND_SetVolume(channel, 2);
+  FSOUND_SetVolume(channel, 4);
   FSOUND_SetPaused(channel, false);
 
   footstep = FSOUND_Sample_Load(FSOUND_UNMANAGED,

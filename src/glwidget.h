@@ -155,6 +155,11 @@ private:
   bool mirror1;
 
   /**
+   * Whether to draw the mirror part of floor.
+   */
+  bool mirrorFloor;
+
+  /**
    * @return The speed of the ball if user throws it with current power.
    */
   double throwSpeed();

@@ -68,8 +68,10 @@ GLWidget::GLWidget() :
     mousePressed(false),
     mayBeOpenShot(true),
     mirror0(true),
-    mirror1(false)
+    mirror1(false),
+    mirrorFloor(true)
 {
+  setWindowIcon(QIcon(MyGlobal::APP_ICON_PATH));
   timer = new QTimer();
   timer->setInterval(25);
   connect(timer, SIGNAL(timeout()), SLOT(advance()));
@@ -182,7 +184,7 @@ void GLWidget::paintGL()
   audience[2]->render();
   audience[3]->render();
 
-  if (true)
+  if (mirrorFloor)
   {
     double eqr[] = {0.0, 0.0, -1.0, 0.0};
     glColorMask(0, 0, 0, 0);
@@ -221,6 +223,14 @@ void GLWidget::paintGL()
     glDisable(GL_BLEND);
     glClear(GL_STENCIL_BUFFER_BIT);
   }
+  else
+  {
+    floor->render();
+    basketBall->render();
+    basket[0]->render();
+    basket[1]->render();
+  }
+
   if (mirror0)
   {
     double eqr[] = {0.0, 1.0, 0.0, 0.0};
@@ -252,7 +262,6 @@ void GLWidget::paintGL()
     glDisable(GL_STENCIL_TEST);
     glEnable(GL_BLEND);
     glDisable(GL_LIGHTING);
-    glColor4f(0.8, 0.8, 0.8, 0.8);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     basket[0]->renderRebound();
     glEnable(GL_LIGHTING);
@@ -291,7 +300,6 @@ void GLWidget::paintGL()
     glDisable(GL_STENCIL_TEST);
     glEnable(GL_BLEND);
     glDisable(GL_LIGHTING);
-    glColor4f(0.8, 0.8, 0.8, 0.8);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     basket[1]->renderRebound();
     glEnable(GL_LIGHTING);
@@ -303,12 +311,6 @@ void GLWidget::paintGL()
 
   if (!mirror1)
     basket[1]->renderRebound();
-
-  if (false)
-  {
-    basket[0]->render();
-    basket[1]->render();
-  }
 
   net[0]->render();
   net[1]->render();
@@ -554,6 +556,11 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
     break;
   case Qt::Key_BracketRight:
     mirror0 = !mirror0;
+    break;
+  case Qt::Key_Backslash:
+    mirrorFloor = !mirrorFloor;
+    break;
+  default:
     break;
   }
   if (builtInOperation >= 0)

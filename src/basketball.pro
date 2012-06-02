@@ -59,3 +59,5 @@ INCLUDEPATH += ../include/
 
 RESOURCES += \
     images.qrc
+
+RC_FILE = icon.rc
