@@ -2,6 +2,7 @@
 
 #include <QtOpenGL>
 #include <QKeyEvent>
+#include "audience.h"
 #include "audiencecamera.h"
 #include "basket.h"
 #include "basketball.h"
@@ -94,6 +95,23 @@ void GLWidget::initializeGL()
   basket[1] = new Basket(Point3D(0, -MyGlobal::BASKETBALL_COURT_LENGTH / 2 + 2.7, 0),
                          PI, world);
 
+  audience[0] = new Audience(Point3D(-MyGlobal::BASKETBALL_COURT_WIDTH / 2 - 7,
+                                     MyGlobal::BASKETBALL_COURT_LENGTH / 2 - 1,
+                                     0),
+                             PI / 2);
+  audience[1] = new Audience(Point3D(-MyGlobal::BASKETBALL_COURT_WIDTH / 2 - 7,
+                                     -MyGlobal::BASKETBALL_COURT_LENGTH / 2 + 1,
+                                     0),
+                             PI / 2);
+  audience[2] = new Audience(Point3D(-MyGlobal::BASKETBALL_COURT_WIDTH / 2 - 7,
+                                     MyGlobal::BASKETBALL_COURT_LENGTH / 2,
+                                     0),
+                             PI / 2);
+  audience[3] = new Audience(Point3D(-MyGlobal::BASKETBALL_COURT_WIDTH / 2 - 7,
+                                     -MyGlobal::BASKETBALL_COURT_LENGTH / 2,
+                                     0),
+                             PI / 2);
+
   net[0] = new Net(Point3D(0,
                            MyGlobal::BASKETBALL_COURT_LENGTH / 2 - 2.7,
                            MyGlobal::BASKET_HEIGHT));
@@ -138,8 +156,6 @@ void GLWidget::initializeGL()
 
 void GLWidget::paintGL()
 {
-  Point3D fromPos = cameras[(int) cameraType]->fromPos();
-
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
   glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);
@@ -161,6 +177,10 @@ void GLWidget::paintGL()
   glEnable(GL_BLEND);
 
   walls->render();
+  audience[0]->render();
+  audience[1]->render();
+  audience[2]->render();
+  audience[3]->render();
 
   if (true)
   {
@@ -699,6 +719,10 @@ GLWidget::~GLWidget()
   delete timer;
   delete basket[0];
   delete basket[1];
+  delete audience[0];
+  delete audience[1];
+  delete audience[2];
+  delete audience[3];
   delete floor;
   delete walls;
   delete cameras[0];

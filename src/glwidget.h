@@ -9,6 +9,7 @@
 #include "point3d.h"
 
 class AbstractCamera;
+class Audience;
 class Ball;
 class Basket;
 class BasketBall;
@@ -77,6 +78,11 @@ private:
    * The world.
    */
   MyWorld *world;
+
+  /**
+   * The audience.
+   */
+  Audience *audience[4];
 
   /**
    * The baskets.

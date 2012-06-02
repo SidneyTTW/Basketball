@@ -65,6 +65,10 @@ namespace MyGlobal
                                         ":/images/1.png",
                                         ":/images/2.png",
                                         ":/images/3.png"};
+  const QString AUDIENCE_TEXTURE_PATH[] = {":/images/audience0.png",
+                                           ":/images/audience1.png",
+                                           ":/images/audience2.png",
+                                           ":/images/audience3.png"};
   const QString COURT_TEXTURE_PATH = ":/images/lakers.png";
   const char * const SOUND_PATHS[] = {"sounds/basketballflat.wav",
                                       "sounds/basketballring.wav",

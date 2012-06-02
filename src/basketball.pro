@@ -27,7 +27,8 @@ SOURCES += main.cpp \
     soundcontroller.cpp \
     net.cpp \
     myglobal.cpp \
-    walls.cpp
+    walls.cpp \
+    audience.cpp
 
 HEADERS  += \
     glwidget.h \
@@ -48,7 +49,8 @@ HEADERS  += \
     basket.h \
     soundcontroller.h \
     net.h \
-    walls.h
+    walls.h \
+    audience.h
 
 LIBS += -L ../lib/
 LIBS += -lfmod

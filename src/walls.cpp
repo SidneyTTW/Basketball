@@ -11,8 +11,9 @@ float Walls::materialAmbient[4] = {0.2, 0.2, 0.2, 1.0};
 float Walls::materialDiffuse[4] = {1.0, 1.0, 1.0, 1.0};
 float Walls::materialSpecular[4] = {0.0, 0.0, 0.0, 1.0};
 
-#define NEAR_RATE    1.4
-#define FAR_RATE     2
+#define NEAR_RATE    1.8
+#define FAR_RATE     4
+#define TOP          15.0
 
 Walls::Walls(MyWorld *world)
 {
@@ -61,10 +62,10 @@ void Walls::render()
                                          0.0f);
     glTexCoord2f(1.0f, 1.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2 * NEAR_RATE,
                                          MyGlobal::GYM_LENGTH / 2 * FAR_RATE,
-                                         5.0f);
+                                         TOP);
     glTexCoord2f(0.0f, 1.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2 * NEAR_RATE,
                                          MyGlobal::GYM_LENGTH / 2 * FAR_RATE,
-                                         5.0f);
+                                         TOP);
   glEnd();
 
   glBindTexture(GL_TEXTURE_2D, textures[1]);
@@ -79,10 +80,10 @@ void Walls::render()
                                          0.0f);
     glTexCoord2f(1.0f, 1.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2 * NEAR_RATE,
                                          -MyGlobal::GYM_LENGTH / 2 * FAR_RATE,
-                                         5.0f);
+                                         TOP);
     glTexCoord2f(0.0f, 1.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2 * NEAR_RATE,
                                          -MyGlobal::GYM_LENGTH / 2 * FAR_RATE,
-                                         5.0f);
+                                         TOP);
   glEnd();
 
   glBindTexture(GL_TEXTURE_2D, textures[2]);
@@ -97,10 +98,10 @@ void Walls::render()
                                          0.0f);
     glTexCoord2f(1.0f, 1.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2 * FAR_RATE,
                                          -MyGlobal::GYM_LENGTH / 2 * NEAR_RATE,
-                                         5.0f);
+                                         TOP);
     glTexCoord2f(0.0f, 1.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2 * FAR_RATE,
                                          MyGlobal::GYM_LENGTH / 2 * NEAR_RATE,
-                                         5.0f);
+                                         TOP);
   glEnd();
 
   glBindTexture(GL_TEXTURE_2D, textures[3]);
@@ -115,10 +116,10 @@ void Walls::render()
                                          0.0f);
     glTexCoord2f(1.0f, 1.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2 * FAR_RATE,
                                          MyGlobal::GYM_LENGTH / 2 * NEAR_RATE,
-                                         5.0f);
+                                         TOP);
     glTexCoord2f(0.0f, 1.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2 * FAR_RATE,
                                          -MyGlobal::GYM_LENGTH / 2 * NEAR_RATE,
-                                         5.0f);
+                                         TOP);
   glEnd();
 }
 
