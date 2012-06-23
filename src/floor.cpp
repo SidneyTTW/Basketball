@@ -28,20 +28,57 @@ void Floor::render()
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, texture);
 
+  float xFrom = MyGlobal::GYM_WIDTH / 2;
+  float xTo = -MyGlobal::GYM_WIDTH / 2;
+  float yFrom = -MyGlobal::GYM_LENGTH / 2;
+  float yTo = MyGlobal::GYM_LENGTH / 2;
+
   glBegin(GL_QUADS);
     glNormal3f(0.0, 0.0, 1.0);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2,
-                                         -MyGlobal::GYM_LENGTH / 2,
-                                         0.0f);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f(MyGlobal::GYM_WIDTH / 2,
-                                         MyGlobal::GYM_LENGTH / 2,
-                                         0.0f);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2,
-                                         MyGlobal::GYM_LENGTH / 2,
-                                         0.0f);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(-MyGlobal::GYM_WIDTH / 2,
-                                         -MyGlobal::GYM_LENGTH / 2,
-                                         0.0f);
+    for (int i = 0;i < 100;++i)
+      for (int j = 0;j < 200;++j)
+      {
+        glTexCoord2f(j / 200.0f, i / 100.0f);
+        glVertex3f(xFrom + (xTo - xFrom) * i / 100.0f,
+                   yFrom + (yTo - yFrom) * j / 200.0f,
+                   0.0f);
+        glTexCoord2f((j + 1) / 200.0f, i / 100.0f);
+        glVertex3f(xFrom + (xTo - xFrom) * i / 100.0f,
+                   yFrom + (yTo - yFrom) * (j + 1) / 200.0f,
+                   0.0f);
+        glTexCoord2f((j + 1) / 200.0f, (i + 1) / 100.0f);
+        glVertex3f(xFrom + (xTo - xFrom) * (i + 1) / 100.0f,
+                   yFrom + (yTo - yFrom) * (j + 1) / 200.0f,
+                   0.0f);
+        glTexCoord2f(j / 200.0f, (i + 1) / 100.0f);
+        glVertex3f(xFrom + (xTo - xFrom) * (i + 1) / 100.0f,
+                   yFrom + (yTo - yFrom) * j / 200.0f,
+                   0.0f);
+      }
+  glEnd();
+
+  glPopMatrix();
+}
+
+void Floor::renderMirror()
+{
+  glPushMatrix();
+  glTranslatef(translate._x, translate._y, translate._z);
+
+  glBegin(GL_QUADS);
+    glNormal3f(0.0, 0.0, 1.0);
+    glVertex3f(MyGlobal::GYM_WIDTH / 2,
+               -MyGlobal::GYM_LENGTH / 2,
+               0.0f);
+    glVertex3f(MyGlobal::GYM_WIDTH / 2,
+               MyGlobal::GYM_LENGTH / 2,
+               0.0f);
+    glVertex3f(-MyGlobal::GYM_WIDTH / 2,
+               MyGlobal::GYM_LENGTH / 2,
+               0.0f);
+    glVertex3f(-MyGlobal::GYM_WIDTH / 2,
+               -MyGlobal::GYM_LENGTH / 2,
+               0.0f);
   glEnd();
 
   glPopMatrix();

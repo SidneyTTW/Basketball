@@ -6,3 +6,4 @@ release/Makefile.Release
 release/object_script.basketball.Debug
 release/object_script.basketball.Release
 src/basketball.pro.user
+submit

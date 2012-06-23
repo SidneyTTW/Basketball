@@ -14,6 +14,7 @@
 #include "playercamera.h"
 #include "ring.h"
 #include "soundcontroller.h"
+#include "stadium.h"
 #include "walls.h"
 #include "zcamera.h"
 
@@ -55,16 +56,19 @@ Point3D GLWidget::builtInSpeeds[15] =
   Point3D(-3.5, 2.5, 6.5)
 };
 
-GLfloat ambient[] = {0.25f, 0.25f, 0.25f, 1.0f};
-GLfloat diffuse[] = {1.0f, 1.0f, 1.0f, 1.0f};
+GLfloat noLight[] = {0.0f, 0.0f, 0.0f, 1.0f};
+GLfloat ambient[] = {0.25f, 0.25, 0.25, 1.0f};
+GLfloat diffuse[] = {0.8f, 0.8f, 0.8f, 1.0f};
 GLfloat specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
-GLfloat position[] = {0.0f, 0.0f, 10.0f};
+GLfloat position[] = {0.0f, 0.0f, 10.0f, 1.0f};
 GLfloat spotDir[] = {0.0f, 0.0f, -10.0f};
+GLfloat fogColor[] = {0.2f, 0.2f, 0.2f, 1.0f};
 
 GLWidget::GLWidget() :
     cameraType(TypeAudience),
-    speed(25),
+    speed(40),
     forceAngle(0),
+    mouseMoving(false),
     mousePressed(false),
     mayBeOpenShot(true),
     mirror0(true),
@@ -72,8 +76,9 @@ GLWidget::GLWidget() :
     mirrorFloor(true)
 {
   setWindowIcon(QIcon(MyGlobal::APP_ICON_PATH));
+  setMouseTracking(true);
   timer = new QTimer();
-  timer->setInterval(25);
+  timer->setInterval(40);
   connect(timer, SIGNAL(timeout()), SLOT(advance()));
   timer->start();
 }
@@ -92,26 +97,28 @@ void GLWidget::initializeGL()
   world->addStaticXYFlat(floor);
   walls = new Walls(world);
 
+  stadium = new Stadium(Point3D(0, 0, 0));
+
   basket[0] = new Basket(Point3D(0, MyGlobal::BASKETBALL_COURT_LENGTH / 2 - 2.7, 0),
                          0, world);
   basket[1] = new Basket(Point3D(0, -MyGlobal::BASKETBALL_COURT_LENGTH / 2 + 2.7, 0),
                          PI, world);
 
-  audience[0] = new Audience(Point3D(-MyGlobal::BASKETBALL_COURT_WIDTH / 2 - 7,
-                                     MyGlobal::BASKETBALL_COURT_LENGTH / 2 - 1,
-                                     0),
+  audience[0] = new Audience(Point3D(-MyGlobal::BASKETBALL_COURT_WIDTH / 2 - 3.5,
+                                     MyGlobal::BASKETBALL_COURT_LENGTH / 2 - 2.8,
+                                     0.2),
                              PI / 2);
-  audience[1] = new Audience(Point3D(-MyGlobal::BASKETBALL_COURT_WIDTH / 2 - 7,
-                                     -MyGlobal::BASKETBALL_COURT_LENGTH / 2 + 1,
-                                     0),
+  audience[1] = new Audience(Point3D(-MyGlobal::BASKETBALL_COURT_WIDTH / 2 - 3.5,
+                                     -2.1,
+                                     0.2),
                              PI / 2);
-  audience[2] = new Audience(Point3D(-MyGlobal::BASKETBALL_COURT_WIDTH / 2 - 7,
-                                     MyGlobal::BASKETBALL_COURT_LENGTH / 2,
-                                     0),
+  audience[2] = new Audience(Point3D(-MyGlobal::BASKETBALL_COURT_WIDTH / 2 - 3.5,
+                                     MyGlobal::BASKETBALL_COURT_LENGTH / 2 - 1.65,
+                                     0.2),
                              PI / 2);
-  audience[3] = new Audience(Point3D(-MyGlobal::BASKETBALL_COURT_WIDTH / 2 - 7,
-                                     -MyGlobal::BASKETBALL_COURT_LENGTH / 2,
-                                     0),
+  audience[3] = new Audience(Point3D(-MyGlobal::BASKETBALL_COURT_WIDTH / 2 - 3.5,
+                                     0.2,
+                                     0.2),
                              PI / 2);
 
   net[0] = new Net(Point3D(0,
@@ -147,6 +154,12 @@ void GLWidget::initializeGL()
           SIGNAL(ballThroughRing(Ball*,Ring*,bool)),
           SLOT(score(Ball*,Ring*,bool)));
 
+  glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, ambient);
+  glLightfv(GL_LIGHT0, GL_SPECULAR, noLight);
+  glLightfv(GL_LIGHT0, GL_POSITION, position);
+  glEnable(GL_LIGHT0);
+
   glClearColor(0.2f, 0.2f, 0.2f, 0.5f);
   glClearDepth(1.0f);
   glClearStencil(0);
@@ -154,30 +167,41 @@ void GLWidget::initializeGL()
   glEnable(GL_DEPTH_TEST);
   glShadeModel(GL_SMOOTH);
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+  glFogi(GL_FOG_MODE, GL_LINEAR);
+  glFogfv(GL_FOG_COLOR, fogColor);
+  glFogf(GL_FOG_DENSITY, 0.5);
+  glHint(GL_FOG_HINT, GL_DONT_CARE);
 }
 
 void GLWidget::paintGL()
 {
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  cameras[(int) cameraType]->look();
+
   glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);
   glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuse);
   glLightfv(GL_LIGHT1, GL_SPECULAR, specular);
   glLightfv(GL_LIGHT1, GL_POSITION, position);
+  glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 20.0f);
+  Point3D lightPos = Point3D(position[0], position[1], position[2]);
+  Point3D lightDir = basketBall->translate - lightPos;
+  spotDir[0] = lightDir._x;
+  spotDir[1] = lightDir._y;
+  spotDir[2] = lightDir._z;
+  glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotDir);
+  glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 60.0f);
 
+  glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT1);
-  glEnable(GL_LIGHTING);
 
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  paintPower();
-
-  cameras[(int) cameraType]->look();
-
-  glEnable(GL_LIGHTING);
   glEnable(GL_BLEND);
 
+  stadium->render();
   walls->render();
   audience[0]->render();
   audience[1]->render();
@@ -192,7 +216,7 @@ void GLWidget::paintGL()
     glStencilFunc(GL_ALWAYS, 1, 1);
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
     glDisable(GL_DEPTH_TEST);
-    floor->render();
+    floor->renderMirror();
     glEnable(GL_DEPTH_TEST);
     glColorMask(1, 1, 1, 1);
     glStencilFunc(GL_EQUAL, 1, 1);
@@ -201,12 +225,18 @@ void GLWidget::paintGL()
     glClipPlane(GL_CLIP_PLANE0, eqr);
     glDisable(GL_LIGHTING);
 
+    glFogf(GL_FOG_START, 0);
+    glFogf(GL_FOG_END, 15);
+    glEnable(GL_FOG);
+
     glPushMatrix(); {
       glScalef(1.0, 1.0, -1.0);
       basketBall->render();
       basket[0]->render();
       basket[1]->render();
     } glPopMatrix();
+
+    glDisable(GL_FOG);
 
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_STENCIL_TEST);
@@ -218,8 +248,8 @@ void GLWidget::paintGL()
     glDisable(GL_LIGHTING);
     glColor4f(0.8, 0.8, 0.8, 0.7);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    floor->render();
     glEnable(GL_LIGHTING);
+    floor->render();
     glDisable(GL_BLEND);
     glClear(GL_STENCIL_BUFFER_BIT);
   }
@@ -229,6 +259,7 @@ void GLWidget::paintGL()
     basketBall->render();
     basket[0]->render();
     basket[1]->render();
+    glDisable(GL_BLEND);
   }
 
   if (mirror0)
@@ -250,24 +281,33 @@ void GLWidget::paintGL()
 
     Point3D reboundPos = basket[0]->getRebound()->translate;
 
+    glFogf(GL_FOG_START, 0);
+    glFogf(GL_FOG_END, 3);
+    glEnable(GL_FOG);
+
     glPushMatrix(); {
       glTranslatef(0, 2 * reboundPos._y, 0);
       glScalef(1.0, -1.0, 1.0);
-      if (basketBall->translate._y < reboundPos._y)
+      if (basketBall->translate._y < reboundPos._y &&
+          basketBall->translate._y + 2 > reboundPos._y)
         basketBall->render();
       net[0]->render();
     } glPopMatrix();
+
+    glDisable(GL_FOG);
 
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_STENCIL_TEST);
     glEnable(GL_BLEND);
     glDisable(GL_LIGHTING);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    basket[0]->renderRebound();
     glEnable(GL_LIGHTING);
+    basket[0]->renderRebound();
     glDisable(GL_BLEND);
     glClear(GL_STENCIL_BUFFER_BIT);
   }
+  else
+    glDisable(GL_BLEND);
 
   if (mirror1)
   {
@@ -288,24 +328,34 @@ void GLWidget::paintGL()
 
     Point3D reboundPos = basket[1]->getRebound()->translate;
 
+    glFogf(GL_FOG_START, 0);
+    glFogf(GL_FOG_END, 3);
+    glEnable(GL_FOG);
+
     glPushMatrix(); {
       glTranslatef(0, 2 * reboundPos._y, 0);
       glScalef(1.0, -1.0, 1.0);
-      if (basketBall->translate._y > reboundPos._y)
+      if (basketBall->translate._y > reboundPos._y &&
+          basketBall->translate._y - 2 < reboundPos._y)
         basketBall->render();
       net[1]->render();
     } glPopMatrix();
+
+    glDisable(GL_FOG);
 
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_STENCIL_TEST);
     glEnable(GL_BLEND);
     glDisable(GL_LIGHTING);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    basket[1]->renderRebound();
     glEnable(GL_LIGHTING);
+    basket[1]->renderRebound();
     glDisable(GL_BLEND);
     glClear(GL_STENCIL_BUFFER_BIT);
   }
+  else
+    glDisable(GL_BLEND);
+
   if (!mirror0)
     basket[0]->renderRebound();
 
@@ -316,6 +366,10 @@ void GLWidget::paintGL()
   net[1]->render();
 
   paintShadow();
+
+  glLoadIdentity();
+
+  paintPower();
 
   glFlush();
   glClear(GL_STENCIL_BUFFER_BIT);
@@ -560,6 +614,20 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
   case Qt::Key_Backslash:
     mirrorFloor = !mirrorFloor;
     break;
+  case Qt::Key_F2:
+    if (isFullScreen())
+      showNormal();
+    else
+      showFullScreen();
+    mouseMoving = false;
+    break;
+  case Qt::Key_Escape:
+    if (isFullScreen())
+    {
+      showNormal();
+      mouseMoving = false;
+    }
+    break;
   default:
     break;
   }
@@ -585,16 +653,23 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
-  switch (cameraType)
+  if ((!isFullScreen()) && (event->buttons() == Qt::NoButton))
+    return;
+  if (mouseMoving)
   {
-  case TypePlayer:
+    switch (cameraType)
     {
-      PlayerCamera *camera = (PlayerCamera *) (cameras[(int) cameraType]);
-      camera->lookRight((event->pos().x() - lastPosition.x()) * 0.015);
-      camera->lookDown((event->pos().y() - lastPosition.y()) * 0.015);
+    case TypePlayer:
+      {
+        PlayerCamera *camera = (PlayerCamera *) (cameras[(int) cameraType]);
+        camera->lookRight((event->pos().x() - lastPosition.x()) * 0.015);
+        camera->lookDown((event->pos().y() - lastPosition.y()) * 0.015);
+      }
+      break;
     }
-    break;
   }
+  else
+    mouseMoving = true;
   lastPosition = event->pos();
 }
 
@@ -668,6 +743,9 @@ void GLWidget::paintPower()
   double percentage = qAbs(qSin(forceAngle));
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_LIGHTING);
+  glDisable(GL_COLOR_MATERIAL);
+  glDisable(GL_BLEND);
+  glDisable(GL_DEPTH_TEST);
 
   glBegin(GL_LINES);
     glColor3ub(50, 220, 50);
@@ -692,6 +770,7 @@ void GLWidget::paintPower()
     glVertex3f(-0.25 + 0.05 * percentage, -0.2 + 0.2 * percentage, -0.5);
   glEnd();
 
+  glEnable(GL_DEPTH_TEST);
   glEnable(GL_LIGHTING);
 }
 
@@ -711,7 +790,7 @@ void GLWidget::paintShadow()
                          (lightPos._z / (lightPos._z - basketBall->translate._z));
   double r = basketBall->r * lightPos._z / (lightPos._z - basketBall->translate._z);
   glNormal3f(0, 0, 1);
-  glColor4f(0.0, 0.0, 0.0, qBound(0.0, 0.5 - basketBall->translate._z / lightPos._z * 2, 1.0));
+  glColor4f(0.0, 0.0, 0.0, qBound(0.0, 0.65 - basketBall->translate._z / lightPos._z * 1.5, 1.0));
   glBegin(GL_POLYGON);
     for(double angle = 0;angle <= (2.0 * PI);angle += 0.1f)
       glVertex3f(shadowCenter._x + r * qSin(angle),
@@ -737,4 +816,5 @@ GLWidget::~GLWidget()
   delete cameras[2];
   delete basketBall;
   delete world;
+  delete stadium;
 }

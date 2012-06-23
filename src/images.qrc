@@ -2,10 +2,6 @@
     <qresource prefix="/">
         <file>images/basketball.png</file>
         <file>images/lakers.png</file>
-        <file>images/3.png</file>
-        <file>images/2.png</file>
-        <file>images/0.png</file>
-        <file>images/1.png</file>
         <file>images/audience1.png</file>
         <file>images/audience2.png</file>
         <file>images/audience3.png</file>

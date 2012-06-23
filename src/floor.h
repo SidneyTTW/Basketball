@@ -14,10 +14,9 @@ public:
    */
   Floor();
 
-  /**
-   * Destructor.
-   */
   void render();
+
+  void renderMirror();
 
 private:
   /**

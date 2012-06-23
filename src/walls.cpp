@@ -29,19 +29,19 @@ Walls::Walls(MyWorld *world)
   world->addStaticXZFlat(walls[1]);
   world->addStaticYZFlat(walls[2]);
   world->addStaticYZFlat(walls[3]);
-  if (textures == NULL)
-  {
-    textures = new int[4];
-    textures[0] = GLAid::loadTexture(MyGlobal::WALLS_TEXTURE_PATH[0]);
-    textures[1] = GLAid::loadTexture(MyGlobal::WALLS_TEXTURE_PATH[1]);
-    textures[2] = GLAid::loadTexture(MyGlobal::WALLS_TEXTURE_PATH[2]);
-    textures[3] = GLAid::loadTexture(MyGlobal::WALLS_TEXTURE_PATH[3]);
-  }
+//  if (textures == NULL)
+//  {
+//    textures = new int[4];
+//    textures[0] = GLAid::loadTexture(MyGlobal::WALLS_TEXTURE_PATH[0]);
+//    textures[1] = GLAid::loadTexture(MyGlobal::WALLS_TEXTURE_PATH[1]);
+//    textures[2] = GLAid::loadTexture(MyGlobal::WALLS_TEXTURE_PATH[2]);
+//    textures[3] = GLAid::loadTexture(MyGlobal::WALLS_TEXTURE_PATH[3]);
+//  }
 }
 
 void Walls::render()
 {
-  glEnable(GL_COLOR_MATERIAL);
+  return;
   glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbient);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDiffuse);
   glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);

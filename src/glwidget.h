@@ -18,6 +18,7 @@ class Floor;
 class MyWorld;
 class Net;
 class Ring;
+class Stadium;
 class Walls;
 
 /**
@@ -80,6 +81,11 @@ private:
   MyWorld *world;
 
   /**
+   * The stadium.
+   */
+  Stadium *stadium;
+
+  /**
    * The audience.
    */
   Audience *audience[4];
@@ -123,6 +129,8 @@ private:
    * Whether left mouse if pressed.
    */
   bool mousePressed;
+
+  bool mouseMoving;
 
   /**
    * Whether a shot may be an open one.
