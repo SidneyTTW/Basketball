@@ -40,8 +40,6 @@ public:
 
 private:
   SoundController() {/* Not supposed to be called */}
-
-  static Point3D listennerPos;
 };
 
 #endif // SOUNDCONTROLLER_H

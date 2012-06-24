@@ -2,9 +2,6 @@
 
 #include <fmod_errors.h>
 #include "myglobal.h"
-#include <QDebug>
-
-Point3D SoundController::listennerPos = Point3D();
 
 SoundController::SoundUnit SoundController::sounds[3];
 
@@ -26,14 +23,16 @@ void SoundController::init()
 
   if (!FSOUND_Init(44100, 32, 0))
     return;
+  float pos[] = {0.0f, 0.0f, 0.0f};
+  FSOUND_3D_Listener_SetAttributes(pos, pos, 0, 0, 1.0f, 0, 1.0f, 0);
 
   // Load sounds/musics
   for (int i = 0;i < 3;++i)
   {
     sounds[i].channel = -1;
-    sounds[i].sound = FSOUND_Sample_Load(FSOUND_UNMANAGED,
+    sounds[i].sound = FSOUND_Sample_Load(FSOUND_FREE,
                                          MyGlobal::SOUND_PATHS[i],
-                                         FSOUND_HW2D,
+                                         FSOUND_HW3D,
                                          0,
                                          0);
     FSOUND_Sample_SetMinMaxDistance(sounds[i].sound, 1.0f, 20.0f);
@@ -65,55 +64,40 @@ void SoundController::playSound
   if (volumn <= 0.03 && volumn != OpenShot)
     return;
 
-//  float pos2[3];
-//  pos2[0] = pos._x;
-//  pos2[1] = pos._y;
-//  pos2[2] = pos._z;
-
-//  float vel[3] = { 0,0,0 };
+  float zero[3] = {0.0f, 0.0f, 0.0f};
 
   if (sounds[type].channel != -1)
     FSOUND_StopSound(sounds[type].channel);
 
   sounds[type].channel = FSOUND_PlaySoundEx(FSOUND_FREE, sounds[type].sound, NULL, true);
-  double dis = (listennerPos - pos).radius();
-//  FSOUND_3D_SetAttributes(sounds[type].channel, pos2, vel);
-  if (dis < 1)
-    FSOUND_SetVolume(sounds[type].channel, 255 * volumn);
-  else
-    FSOUND_SetVolume(sounds[type].channel, 255 * volumn / ((dis + 9) / 5));
-
-  FSOUND_SetPaused(sounds[type].channel, false);
+  FSOUND_SetVolume(sounds[type].channel, 0);
+  FSOUND_3D_SetAttributes(sounds[type].channel, zero, zero);
   sounds[type].position = pos;
   sounds[type].volumn = volumn;
 }
 
 void SoundController::setListennerPosition(Point3D position, Point3D direction)
 {
-  return;
-  listennerPos = position;
   double tp, ts, tr;
   double dis;
-  float pos[3] = { 0,0,0 };
-  float vel[3] = { 0,0,0 };
+  float pos[3] = {0, 0, 0};
+  float vel[3] = {0, 0, 0};
   for (int i = 0;i < 3;++i)
   {
     if (sounds[i].channel != -1)
     {
-      pos[0] = position._x;
-      pos[1] = position._y;
-      pos[2] = position._z;
-      vel[0] = direction._x;
-      vel[1] = direction._y;
-      vel[2] = direction._z;
-      FSOUND_3D_Listener_SetAttributes(pos, vel, 0, 0, 1.0f, 0, 1.0f, 0);
       ts = calculateAngle(direction._x, direction._y);
-      direction = sounds[i].position - listennerPos;
+      direction = sounds[i].position - position;
       tp = calculateAngle(direction._x, direction._y);
       dis = qSqrt(direction._x * direction._x + direction._y * direction._y);
-      tr = tp - ts;
-      vel[0] = -qCos(tr) * dis;
+      tr = ts - tp;
+      pos[0] = qSin(tr) * (dis >= 3 ? 3.0f : dis);
       FSOUND_3D_SetAttributes(sounds[i].channel, pos, vel);
+      if (dis < 1)
+        FSOUND_SetVolume(sounds[i].channel, 255 * sounds[i].volumn);
+      else
+        FSOUND_SetVolume(sounds[i].channel, 255 * sounds[i].volumn / ((dis + 14) / 15));
+      FSOUND_SetPaused(sounds[i].channel, false);
     }
   }
 }

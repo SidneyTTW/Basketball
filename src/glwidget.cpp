@@ -168,9 +168,9 @@ void GLWidget::initializeGL()
   glShadeModel(GL_SMOOTH);
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-  glFogi(GL_FOG_MODE, GL_LINEAR);
+  glFogi(GL_FOG_MODE, GL_EXP);
   glFogfv(GL_FOG_COLOR, fogColor);
-  glFogf(GL_FOG_DENSITY, 0.5);
+  glFogf(GL_FOG_DENSITY, 0.2);
   glHint(GL_FOG_HINT, GL_DONT_CARE);
 }
 
@@ -513,7 +513,7 @@ void GLWidget::bounceBallFlat(Ball *ball, Flat *flat)
   }
 //  else
 //    qDebug() << "bounce other";
-  double volumn = qBound(0.0, v / 5, 1.0);
+  double volumn = qBound(0.0, v / 5, 0.8);
   SoundController::playSound(SoundController::BounceFlat, ball->translate, volumn);
   mayBeOpenShot = false;
 }
@@ -616,15 +616,22 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
     break;
   case Qt::Key_F2:
     if (isFullScreen())
+    {
       showNormal();
+      setCursor(QCursor(Qt::ArrowCursor));
+    }
     else
+    {
       showFullScreen();
+      setCursor(QCursor(Qt::BlankCursor));
+    }
     mouseMoving = false;
     break;
   case Qt::Key_Escape:
     if (isFullScreen())
     {
       showNormal();
+      setCursor(QCursor(Qt::ArrowCursor));
       mouseMoving = false;
     }
     break;
@@ -670,7 +677,13 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
   }
   else
     mouseMoving = true;
-  lastPosition = event->pos();
+  if (isFullScreen())
+  {
+    QCursor::setPos(width() / 2, height() / 2);
+    lastPosition = QPoint(width() / 2, height() / 2);
+  }
+  else
+    lastPosition = event->pos();
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event)
