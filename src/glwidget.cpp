@@ -2,6 +2,7 @@
 
 #include <QtOpenGL>
 #include <QKeyEvent>
+#include <qmath.h>
 #include "audience.h"
 #include "audiencecamera.h"
 #include "basket.h"
@@ -793,23 +794,44 @@ static float shadowSpecular[4] = {0.0, 0.0, 0.0, 0.0};
 
 void GLWidget::paintShadow()
 {
+  glPushMatrix();
   glEnable(GL_BLEND);
   glMaterialfv(GL_FRONT, GL_AMBIENT, shadowAmbient);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, shadowDiffuse);
   glMaterialfv(GL_FRONT, GL_SPECULAR, shadowSpecular);
   Point3D lightPos = Point3D(position[0], position[1], position[2]);
-  Point3D shadowCenter = lightPos +
-                         (basketBall->translate - lightPos) *
-                         (lightPos._z / (lightPos._z - basketBall->translate._z));
+  Point3D lightDir = basketBall->translate - lightPos;
+  Point3D shadowCenter = lightPos -
+                         (lightDir) *
+                         (lightPos._z / (lightDir._z));
+  glTranslatef(shadowCenter._x, shadowCenter._y, 0);
+  double angle = calculateAngle(lightDir._x, lightDir._y) * 180 / PI + 90;
+  glRotated(angle, 0.0, 0.0, 1.0);
+  double dxy = qSqrt(lightDir._x * lightDir._x + lightDir._y * lightDir._y);
+  angle = qAsin(dxy / lightDir.radius());
+  double angle2 = qAtan(basketBall->r / lightDir.radius());
+  double length = qAbs((qTan(angle + angle2) - qTan(angle - angle2)) * lightPos._z);
+  double scale = length == length ? length / basketBall->r / 2: 1;
+  glScaled(1.0, scale, 1.0);
   double r = basketBall->r * lightPos._z / (lightPos._z - basketBall->translate._z);
   glNormal3f(0, 0, 1);
-  glColor4f(0.0, 0.0, 0.0, qBound(0.0, 0.65 - basketBall->translate._z / lightPos._z * 1.5, 1.0));
-  glBegin(GL_POLYGON);
-    for(double angle = 0;angle <= (2.0 * PI);angle += 0.1f)
-      glVertex3f(shadowCenter._x + r * qSin(angle),
-                 shadowCenter._y + r * qCos(angle),
+  float centerAlpha = qBound(0.0, 0.85 - basketBall->translate._z / lightPos._z * 1, 1.0);
+  glBegin(GL_TRIANGLES);
+    for(double angle = 0;angle <= (2.0 * PI);)
+    {
+      glColor4d(0.0f, 0.0f, 0.0f, 0.0f);
+      glVertex3d(r * qSin(angle),
+                 r * qCos(angle),
                  0.01);
+      angle += 0.1f;
+      glVertex3d(r * qSin(angle),
+                 r * qCos(angle),
+                 0.01);
+      glColor4f(0.0f, 0.0f, 0.0f, centerAlpha);
+      glVertex3d(0.0, 0.0, 0.01);
+    }
   glEnd();
+  glPopMatrix();
 }
 
 GLWidget::~GLWidget()
