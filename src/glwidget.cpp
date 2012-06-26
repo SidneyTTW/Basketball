@@ -813,7 +813,10 @@ void GLWidget::paintShadow()
   double length = qAbs((qTan(angle + angle2) - qTan(angle - angle2)) * lightPos._z);
   double scale = length == length ? length / basketBall->r / 2: 1;
   glScaled(1.0, scale, 1.0);
-  double r = basketBall->r * lightPos._z / (lightPos._z - basketBall->translate._z);
+  scale =  basketBall->r * lightPos._z / (lightPos._z - basketBall->translate._z);
+  scale = scale == scale ? scale / basketBall->r : 1.0;
+  glScaled(scale, 1.0, 1.0);
+  double r = basketBall->r;
   glNormal3f(0, 0, 1);
   float centerAlpha = qBound(0.0, 0.85 - basketBall->translate._z / lightPos._z * 1, 1.0);
   glBegin(GL_TRIANGLES);
